@@ -26,9 +26,6 @@
     },
     "/pets/": {
       "get": {
-        "tags": [
-          "Pets"
-        ],
         "description": "",
         "produces": [
           "application/json"
@@ -43,9 +40,6 @@
         }
       },
       "post": {
-        "tags": [
-          "Pets"
-        ],
         "description": "",
         "parameters": [
           {
@@ -60,16 +54,13 @@
                 "age": {
                   "example": "any"
                 },
-                "type": {
+                "breed": {
                   "example": "any"
                 },
                 "ownerName": {
                   "example": "any"
                 },
                 "appointmentDate": {
-                  "example": "any"
-                },
-                "breed": {
                   "example": "any"
                 },
                 "weight": {
@@ -92,6 +83,9 @@
           "400": {
             "description": "Bad Request"
           },
+          "412": {
+            "description": "Precondition Failed"
+          },
           "500": {
             "description": "Internal Server Error"
           }
@@ -100,9 +94,6 @@
     },
     "/pets/{id}": {
       "get": {
-        "tags": [
-          "Pets"
-        ],
         "description": "",
         "produces": [
           "application/json"
@@ -119,9 +110,6 @@
           "200": {
             "description": "OK"
           },
-          "400": {
-            "description": "Bad Request"
-          },
           "404": {
             "description": "Not Found"
           },
@@ -131,9 +119,6 @@
         }
       },
       "put": {
-        "tags": [
-          "Pets"
-        ],
         "description": "",
         "parameters": [
           {
@@ -154,16 +139,13 @@
                 "age": {
                   "example": "any"
                 },
-                "type": {
+                "breed": {
                   "example": "any"
                 },
                 "ownerName": {
                   "example": "any"
                 },
                 "appointmentDate": {
-                  "example": "any"
-                },
-                "breed": {
                   "example": "any"
                 },
                 "weight": {
@@ -189,15 +171,15 @@
           "404": {
             "description": "Not Found"
           },
+          "412": {
+            "description": "Precondition Failed"
+          },
           "500": {
             "description": "Internal Server Error"
           }
         }
       },
       "delete": {
-        "tags": [
-          "Pets"
-        ],
         "description": "",
         "parameters": [
           {
@@ -210,9 +192,6 @@
         "responses": {
           "204": {
             "description": "No Content"
-          },
-          "400": {
-            "description": "Bad Request"
           },
           "404": {
             "description": "Not Found"
@@ -225,9 +204,6 @@
     },
     "/vets/": {
       "get": {
-        "tags": [
-          "Veterinarians"
-        ],
         "description": "",
         "produces": [
           "application/json"
@@ -235,13 +211,13 @@
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       },
       "post": {
-        "tags": [
-          "Veterinarians"
-        ],
         "description": "",
         "parameters": [
           {
@@ -256,16 +232,10 @@
                 "specialty": {
                   "example": "any"
                 },
-                "experience": {
-                  "example": "any"
-                },
                 "contactNumber": {
                   "example": "any"
                 },
-                "email": {
-                  "example": "any"
-                },
-                "availableDates": {
+                "address": {
                   "example": "any"
                 }
               }
@@ -276,6 +246,12 @@
           "201": {
             "description": "Created"
           },
+          "400": {
+            "description": "Bad Request"
+          },
+          "412": {
+            "description": "Precondition Failed"
+          },
           "500": {
             "description": "Internal Server Error"
           }
@@ -284,9 +260,6 @@
     },
     "/vets/{id}": {
       "get": {
-        "tags": [
-          "Veterinarians"
-        ],
         "description": "",
         "produces": [
           "application/json"
@@ -302,13 +275,16 @@
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       },
       "put": {
-        "tags": [
-          "Veterinarians"
-        ],
         "description": "",
         "parameters": [
           {
@@ -329,16 +305,10 @@
                 "specialty": {
                   "example": "any"
                 },
-                "experience": {
-                  "example": "any"
-                },
                 "contactNumber": {
                   "example": "any"
                 },
-                "email": {
-                  "example": "any"
-                },
-                "availableDates": {
+                "address": {
                   "example": "any"
                 }
               }
@@ -349,15 +319,21 @@
           "204": {
             "description": "No Content"
           },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "412": {
+            "description": "Precondition Failed"
+          },
           "500": {
             "description": "Internal Server Error"
           }
         }
       },
       "delete": {
-        "tags": [
-          "Veterinarians"
-        ],
         "description": "",
         "parameters": [
           {
@@ -370,6 +346,9 @@
         "responses": {
           "204": {
             "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
           },
           "500": {
             "description": "Internal Server Error"
