@@ -5,7 +5,7 @@ const doc = {
     title: 'My API',
     description: 'Pets API, including veterinarians',
   },
-  host: 'localhost:3000',
+  host: 'localhost:10000',
   schemes: ['https', 'http'],
 };
 
