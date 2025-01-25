@@ -1,6 +1,5 @@
 const router = require('express').Router();
 
-// Importing Swagger documentation (optional but can be important for API documentation)
 router.use('/', require('./swagger'));
 
 // Basic Hello World endpoint
@@ -9,7 +8,7 @@ router.get('/', (req, res) => {
     res.send("Hello World!");
 });
 
-// Register the routes for pets and veterinarians (this is fine)
+// Register the routes for pets and veterinarians
 router.use('/pets', require('./pets'));
 router.use('/vets', require('./vets'));
 
