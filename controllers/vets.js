@@ -2,6 +2,7 @@ const mongodb = require('../data/database');
 const ObjectId = require('mongodb').ObjectId;
 
 const getAll = async (req, res) => {
+  //#swagger.tags = ['Veterinarians']
   try {
     const result = await mongodb.getDatabase().db().collection('veterinarians').find().toArray();
     res.setHeader('Content-Type', 'application/json');
@@ -12,6 +13,7 @@ const getAll = async (req, res) => {
 };
 
 const getSingle = async (req, res) => {
+  //#swagger.tags = ['Veterinarians']
   try {
     const vetId = new ObjectId(req.params.id);
     const result = await mongodb.getDatabase().db().collection('veterinarians').find({ _id: vetId }).toArray();
@@ -28,6 +30,7 @@ const getSingle = async (req, res) => {
 };
 
 const createVet = async (req, res) => {
+  //#swagger.tags = ['Veterinarians']
   try {
     const { name, specialty, contactNumber, address } = req.body;
 
@@ -49,6 +52,7 @@ const createVet = async (req, res) => {
 };
 
 const updateVet = async (req, res) => {
+  //#swagger.tags = ['Veterinarians']
   try {
     const vetId = new ObjectId(req.params.id);
     const { name, specialty, contactNumber, address } = req.body;
@@ -71,6 +75,7 @@ const updateVet = async (req, res) => {
 };
 
 const deleteVet = async (req, res) => {
+  //#swagger.tags = ['Veterinarians']
   try {
     const vetId = new ObjectId(req.params.id);
     const response = await mongodb.getDatabase().db().collection('veterinarians').deleteOne({ _id: vetId });

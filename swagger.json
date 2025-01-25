@@ -26,6 +26,9 @@
     },
     "/pets/": {
       "get": {
+        "tags": [
+          "Pets"
+        ],
         "description": "",
         "produces": [
           "application/json"
@@ -40,6 +43,9 @@
         }
       },
       "post": {
+        "tags": [
+          "Pets"
+        ],
         "description": "",
         "parameters": [
           {
@@ -94,6 +100,9 @@
     },
     "/pets/{id}": {
       "get": {
+        "tags": [
+          "Pets"
+        ],
         "description": "",
         "produces": [
           "application/json"
@@ -119,6 +128,9 @@
         }
       },
       "put": {
+        "tags": [
+          "Pets"
+        ],
         "description": "",
         "parameters": [
           {
@@ -180,6 +192,9 @@
         }
       },
       "delete": {
+        "tags": [
+          "Pets"
+        ],
         "description": "",
         "parameters": [
           {
@@ -204,6 +219,9 @@
     },
     "/vets/": {
       "get": {
+        "tags": [
+          "Veterinarians"
+        ],
         "description": "",
         "produces": [
           "application/json"
@@ -218,6 +236,9 @@
         }
       },
       "post": {
+        "tags": [
+          "Veterinarians"
+        ],
         "description": "",
         "parameters": [
           {
@@ -260,6 +281,9 @@
     },
     "/vets/{id}": {
       "get": {
+        "tags": [
+          "Veterinarians"
+        ],
         "description": "",
         "produces": [
           "application/json"
@@ -285,6 +309,9 @@
         }
       },
       "put": {
+        "tags": [
+          "Veterinarians"
+        ],
         "description": "",
         "parameters": [
           {
@@ -334,6 +361,9 @@
         }
       },
       "delete": {
+        "tags": [
+          "Veterinarians"
+        ],
         "description": "",
         "parameters": [
           {

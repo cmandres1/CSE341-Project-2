@@ -2,6 +2,7 @@ const mongodb = require('../data/database');
 const ObjectId = require('mongodb').ObjectId;
 
 const getAll = async (req, res) => {
+  //#swagger.tags = ['Pets']
   try {
     const result = await mongodb.getDatabase().db().collection('pets').aggregate([
       {
@@ -22,6 +23,7 @@ const getAll = async (req, res) => {
 };
 
 const getSingle = async (req, res) => {
+  //#swagger.tags = ['Pets']
   try {
     const petId = new ObjectId(req.params.id);
     const result = await mongodb.getDatabase().db().collection('pets').aggregate([
@@ -48,6 +50,7 @@ const getSingle = async (req, res) => {
 };
 
 const createPet = async (req, res) => {
+  //#swagger.tags = ['Pets']
   try {
     const { name, age, breed, ownerName, appointmentDate, weight, medicalHistory, veterinarianId } = req.body;
 
@@ -79,6 +82,7 @@ const createPet = async (req, res) => {
 };
 
 const updatePet = async (req, res) => {
+  //#swagger.tags = ['Pets']
   try {
     const petId = new ObjectId(req.params.id);
     const { name, age, breed, ownerName, appointmentDate, weight, medicalHistory, veterinarianId } = req.body;
@@ -111,6 +115,7 @@ const updatePet = async (req, res) => {
 };
 
 const deletePet = async (req, res) => {
+  //#swagger.tags = ['Pets']
   try {
     const petId = new ObjectId(req.params.id);
     const response = await mongodb.getDatabase().db().collection('pets').deleteOne({ _id: petId });
