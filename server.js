@@ -11,11 +11,11 @@ const app = express();
 const port = process.env.PORT || 10000;
 app.use(bodyParser.json());
 app.use(session({
-    secret: 'secret', 
+    secret: 'secret', // Use a secure secret key in production
     resave: false, 
     saveUninitialized: true, 
     cookie: {
-        secure: process.env.NODE_ENV === 'production',
+        secure: true, // Set to true if using HTTPS
         httpOnly: true, 
         maxAge: 24 * 60 * 60 * 1000 // 1-day session expiry
     }
@@ -59,7 +59,12 @@ passport.deserializeUser((user, done) => {
     done(null, user);
 });
 
+app.get('/session', (req, res) => {
+    res.json(req.session);
+});
+
 app.get('/', (req, res) => {
+    console.log('Current session:', req.session);
     if (req.session.user) {
         res.send(`Logged in as ${req.session.user.displayName}`);
     } else {
@@ -70,7 +75,9 @@ app.get('/', (req, res) => {
 app.get('/github/callback', passport.authenticate('github', 
     { failureRedirect: '/login' }), 
     (req, res) => {
+        console.log('User after authentication:', req.user); // Debugging
         req.session.user = req.user; // Store user in session
+        console.log('Session after setting user:', req.session); // Debugging
         res.redirect('/');
     });
 

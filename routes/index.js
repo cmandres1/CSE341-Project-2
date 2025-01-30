@@ -15,10 +15,10 @@ router.get('/logout', function (req, res, next) {
 
 // GitHub OAuth callback route
 router.get('/github/callback', passport.authenticate('github', {
-    failureRedirect: '/login',
-    session: true  // Ensure session is enabled
+    failureRedirect: '/login', 
+    session: true // Ensure Passport handles session
 }), (req, res) => {
-    console.log('Logged in user:', req.user);  // Check if user data is available
+    console.log('Logged in user:', req.user);  // Debug log to check user object
     res.redirect('/');
 });
 
@@ -37,6 +37,12 @@ router.get('/', (req, res) => {
         res.send('Logged Out. <a href="/login">Login</a>');
     }
 });
+
+router.get('/session', (req, res) => {
+    console.log("Session data:", req.session);
+    res.json(req.session);
+});
+
 
 // Catch-all for unknown routes
 router.use((req, res) => {
