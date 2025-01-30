@@ -29,11 +29,8 @@ app.use( (req, res, next) => {
     next();
 });
 app.use(cors ({methods: ['GET', 'POST', 'PUT', 'UPDATE', 'DELETE', 'PATCH']}));
-/* app.use(cors ({origin: '*'})); */
-app.use(cors({
-    origin: '*',
-    credentials: true
-}));
+app.use(cors ({origin: '*'}));
+
 app.use('/', require('./routes/index.js'));
 
 passport.use(new GitHubStrategy({
