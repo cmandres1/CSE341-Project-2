@@ -15,9 +15,10 @@ router.get('/logout', function (req, res, next) {
 
 // GitHub OAuth callback route
 router.get('/github/callback', passport.authenticate('github', {
-    failureRedirect: '/login', 
-    session: true // Ensure Passport handles session
+    failureRedirect: '/login',
+    session: true  // Ensure session is enabled
 }), (req, res) => {
+    console.log('Logged in user:', req.user);  // Check if user data is available
     res.redirect('/');
 });
 

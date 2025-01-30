@@ -15,7 +15,7 @@ app.use(session({
     resave: false, 
     saveUninitialized: true, 
     cookie: {
-        secure: true, // Set to true if using HTTPS
+        secure: process.env.NODE_ENV === 'production',
         httpOnly: true, 
         maxAge: 24 * 60 * 60 * 1000 // 1-day session expiry
     }
@@ -39,7 +39,7 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept'], // Allow specific headers
     credentials: true // Allow credentials (cookies) to be sent
 }));
-app.use('/', require('./routes'));
+app.use('/', require('./routes/index.js'));
 
 passport.use(new GitHubStrategy({
     clientID: process.env.GITHUB_CLIENT_ID,
