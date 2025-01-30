@@ -45,18 +45,21 @@ passport.use(new GitHubStrategy({
     clientID: process.env.GITHUB_CLIENT_ID,
     clientSecret: process.env.GITHUB_CLIENT_SECRET,
     callbackURL: process.env.CALLBACK_URL
-}, function (accessToken, refreshToken, profile, done) {
-    // Set displayName to GitHub username if it's null
+}, (accessToken, refreshToken, profile, done) => {
+    // Manually set displayName or fallback to username if not available
     profile.displayName = profile.displayName || profile.username;
     return done(null, profile);
 }));
 
 passport.serializeUser((user, done) => {
-    done(null, user);
+    done(null, user.id);  // Store user ID in the session
 });
 
-passport.deserializeUser((user, done) => {
-    done(null, user);
+passport.deserializeUser((id, done) => {
+    // Retrieve user from database or cache using the ID stored in the session
+    User.findById(id, (err, user) => {
+        done(err, user);  // Attach the full user object to the session
+    });
 });
 
 app.get('/session', (req, res) => {
@@ -64,9 +67,9 @@ app.get('/session', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-    console.log('Current session:', req.session);
-    if (req.session.user) {
-        res.send(`Logged in as ${req.session.user.displayName}`);
+    console.log('User object:', req.user);  // Debugging the user object
+    if (req.isAuthenticated()) {
+        res.send(`Logged in as ${req.user.displayName || req.user.username}`);
     } else {
         res.send('Logged Out. <a href="/login">Login</a>');
     }
