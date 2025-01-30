@@ -35,7 +35,7 @@ router.use('/vets', require('./vets'));
 }); */
 router.get('/', (req, res) => {
     if (req.isAuthenticated()) {
-        res.send(`Logged in as ${req.user.displayName || req.user.username}`); // Use req.user instead of req.session.user
+        res.send(`Logged in as ${req.user.displayName || req.user.username}`);
     } else {
         res.send('Logged Out. <a href="/login">Login</a>');
     }

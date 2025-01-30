@@ -29,7 +29,12 @@ app.use( (req, res, next) => {
     next();
 });
 app.use(cors ({methods: ['GET', 'POST', 'PUT', 'UPDATE', 'DELETE', 'PATCH']}));
-app.use(cors ({origin: '*'}));
+/* app.use(cors ({origin: '*'})); */
+app.use(cors({
+    origin: 'https://cse341-project-2-2pfk.onrender.com', // Allow the Render URL
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true, // Allow cookies to be sent with the request
+}));
 
 app.use('/', require('./routes/index.js'));
 
@@ -49,7 +54,7 @@ passport.deserializeUser((user, done) => {
     done(null, user);
 });
 
-app.get( '/', (req, res) => { res.send (req.session.user !== undefined ? `Logged in as ${req.session.user.displayName}` : 'Logged Out')});
+app.get( '/', (req, res) => { res.send (req.user !== undefined ? `Logged in as ${req.user.displayName || req.user.username}` : 'Logged Out')});
 
 app.get('/github/callback', passport.authenticate('github', 
     { failureRedirect: '/login', session: true }),
