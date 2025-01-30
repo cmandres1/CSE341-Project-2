@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const express = require('express');
 const passport = require('passport');
-const isAuthenticated = require('./authenticate');
+const isAuthenticated = require('../middleware/authenticate');
 
 // Define authentication routes first
 router.get('/login', passport.authenticate('github'));
