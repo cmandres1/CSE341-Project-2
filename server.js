@@ -62,6 +62,18 @@ passport.deserializeUser((id, done) => {
     });
 });
 
+passport.authenticate('github', { session: true }), (req, res) => {
+  console.log('User logged in:', req.user); // Ensure this is logged
+  res.redirect('/');
+};
+
+// After login, in your routes
+app.get('/profile', (req, res) => {
+    console.log('Session:', req.session);
+    console.log('User:', req.user); // Should not be undefined if session is correct
+    res.send(`Logged in as ${req.user ? req.user.username : 'Guest'}`);
+  });
+
 app.get('/session', (req, res) => {
     res.json(req.session);
 });
