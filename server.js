@@ -8,104 +8,62 @@ const cors = require('cors');
 
 const app = express();
 
-const port = process.env.PORT || 10000;
+const port = process.env.PORT || 10000; // Render will provide the PORT
 app.use(bodyParser.json());
+
+// Session configuration
 app.use(session({
-    secret: 'secret', // Use a secure secret key in production
-    resave: false, 
-    saveUninitialized: true, 
+    secret: 'fallback-secret', // Use environment variable
+    resave: false,
+    saveUninitialized: true,
     cookie: {
-        secure: true, // Set to true if using HTTPS
-        httpOnly: true, 
+        secure: process.env.NODE_ENV === 'production', // Enable secure cookies in production
+        httpOnly: true,
         maxAge: 24 * 60 * 60 * 1000 // 1-day session expiry
     }
 }));
 
-// This is the basic express session ({...}) initialization
+// Passport initialization
 app.use(passport.initialize());
-// Init passport on every route call
 app.use(passport.session());
-//allow passport to use express-session
-app.use( (req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Z-Key, Authorization');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    next();
-});
 
+// CORS configuration
 app.use(cors({
-    origin: '*', 
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allow methods
-    allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept'], // Allow specific headers
-    credentials: true // Allow credentials (cookies) to be sent
+    origin: '*', // Allow specific origins in production
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept'],
+    credentials: true
 }));
+
+// Routes
 app.use('/', require('./routes/index.js'));
 
+// GitHub OAuth strategy
 passport.use(new GitHubStrategy({
     clientID: process.env.GITHUB_CLIENT_ID,
     clientSecret: process.env.GITHUB_CLIENT_SECRET,
-    callbackURL: process.env.CALLBACK_URL
-}, (accessToken, refreshToken, profile, done) => {
-    // Manually set displayName or fallback to username if not available
-    profile.displayName = profile.displayName || profile.username;
+    callbackURL: process.env.CALLBACK_URL || 'https://cse341-project-2-2pfk.onrender.com/github/callback'
+}, function (accessToken, refreshToken, profile, done) {
     return done(null, profile);
 }));
 
+// Serialize and deserialize user
 passport.serializeUser((user, done) => {
-    done(null, user.id);  // Store user ID in the session
+    done(null, user);
 });
 
-passport.deserializeUser((id, done) => {
-    // Retrieve user from database or cache using the ID stored in the session
-    User.findById(id, (err, user) => {
-        done(err, user);  // Attach the full user object to the session
-    });
+passport.deserializeUser((user, done) => {
+    done(null, user);
 });
 
-passport.authenticate('github', { session: true }), (req, res) => {
-  console.log('User logged in:', req.user); // Ensure this is logged
-  res.redirect('/');
-};
-
-// After login, in your routes
-app.get('/profile', (req, res) => {
-    console.log('Session:', req.session);
-    console.log('User:', req.user); // Should not be undefined if session is correct
-    res.send(`Logged in as ${req.user ? req.user.username : 'Guest'}`);
-  });
-
-app.get('/session', (req, res) => {
-    res.json(req.session);
-});
-
-app.get('/', (req, res) => {
-    console.log('User object:', req.user);  // Debugging the user object
-    if (req.isAuthenticated()) {
-        res.send(`Logged in as ${req.user.displayName || req.user.username}`);
-    } else {
-        res.send('Logged Out. <a href="/login">Login</a>');
-    }
-});
-
-app.get('/github/callback', passport.authenticate('github', 
-    { failureRedirect: '/login' }), 
-    (req, res) => {
-        console.log('User after authentication:', req.user); // Debugging
-        req.session.user = req.user; // Store user in session
-        console.log('Session after setting user:', req.session); // Debugging
-        res.redirect('/');
-    });
-
-    app.get('/login', (req, res) => {
-        console.log('Session:', req.session);
-        console.log('User:', req.user);
-        res.send('Logged in');
-      });
-
+// Start server
 mongodb.initDb((err) => {
     if (err) {
-        console.log(err);
+        console.error('Failed to connect to the database:', err);
+        process.exit(1); // Exit if database connection fails
     } else {
-        app.listen(port, () => { console.log(`Database is listening and node running on port ${port}`) });
+        app.listen(port, () => {
+            console.log(`Database is listening and node running on port ${port}`);
+        });
     }
 });

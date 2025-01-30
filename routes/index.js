@@ -1,14 +1,17 @@
 const router = require('express').Router();
 const express = require('express');
 const passport = require('passport');
+const isAuthenticated = require('./authenticate');
 
 // Define authentication routes first
 router.get('/login', passport.authenticate('github'));
 
-
 router.get('/logout', function (req, res, next) {
     req.logout(function(err) {
-        if (err) { return next(err); }
+        if (err) { 
+            console.error('Logout error:', err);
+            return res.status(500).json({ message: 'Logout failed' });
+        }
         res.redirect('/');
     });
 });
@@ -29,9 +32,8 @@ router.use('/', require('./swagger'));
 router.use('/pets', require('./pets'));
 router.use('/vets', require('./vets'));
 
-
+// Home route
 router.get('/', (req, res) => {
-    console.log('User object:', req.user);  // Debugging the user object
     if (req.isAuthenticated()) {
         res.send(`Logged in as ${req.user.displayName || req.user.username}`);
     } else {
@@ -39,15 +41,15 @@ router.get('/', (req, res) => {
     }
 });
 
-router.get('/session', (req, res) => {
-    console.log("Session data:", req.session);
-    res.json(req.session);
-});
-
-
 // Catch-all for unknown routes
 router.use((req, res) => {
     res.status(404).json({ message: "Route not found" });
+});
+
+// Error handling middleware
+router.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ message: 'Something went wrong!' });
 });
 
 module.exports = router;
