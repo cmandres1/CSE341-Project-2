@@ -14,7 +14,7 @@ app.use(session({
     secret: "secret",
     resave: false,
     saveUninitialized: false,  // Prevents empty sessions
-    cookie: { secure: false }
+    cookie: { secure: true } // Set to true if using HTTPS
 }));
 
 // This is the basic express session ({...}) initialization
@@ -41,7 +41,6 @@ passport.use(new GitHubStrategy({
     clientSecret: process.env.GITHUB_CLIENT_SECRET,
     callbackURL: process.env.CALLBACK_URL
 }, function (accessToken, refreshToken, profile, done) {
-    console.log('GitHub login success:', profile);
     return done(null, profile);
 }));
 
@@ -56,20 +55,12 @@ passport.deserializeUser((user, done) => {
 app.get( '/', (req, res) => { res.send (req.session.user !== undefined ? `Logged in as ${req.session.user.displayName}` : 'Logged Out')});
 
 app.get('/github/callback', passport.authenticate('github', 
-    { failureRedirect: '/api-docs', session: false }),
+    { failureRedirect: '/login', session: true }),
     (req, res) => {
-    console.log('User session:', req.session); 
     req.session.user = req.user;
     res.redirect('/');
 });
 
-/* app.get('/github/callback', 
-    passport.authenticate('github', { failureRedirect: '/login' }), 
-    (req, res) => {
-        req.session.user = req.user; // Save user in session
-        res.redirect('/'); // Redirect to home after login
-    }
-); */
 
 mongodb.initDb((err) => {
     if (err) {
