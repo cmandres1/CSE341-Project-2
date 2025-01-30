@@ -84,6 +84,11 @@ app.get('/github/callback', passport.authenticate('github',
         res.redirect('/');
     });
 
+    app.get('/login', (req, res) => {
+        console.log('Session:', req.session);
+        console.log('User:', req.user);
+        res.send('Logged in');
+      });
 
 mongodb.initDb((err) => {
     if (err) {
