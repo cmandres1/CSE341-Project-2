@@ -31,6 +31,7 @@ router.use('/vets', require('./vets'));
 
 
 router.get('/', (req, res) => {
+    console.log('User object:', req.user);  // Debugging the user object
     if (req.isAuthenticated()) {
         res.send(`Logged in as ${req.user.displayName || req.user.username}`);
     } else {
