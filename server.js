@@ -39,7 +39,7 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept'], // Allow specific headers
     credentials: true // Allow credentials (cookies) to be sent
 }));
-app.use('/', require('./routes/index.js'));
+app.use('/', require('./routes'));
 
 passport.use(new GitHubStrategy({
     clientID: process.env.GITHUB_CLIENT_ID,
