@@ -46,6 +46,8 @@ passport.use(new GitHubStrategy({
     clientSecret: process.env.GITHUB_CLIENT_SECRET,
     callbackURL: process.env.CALLBACK_URL
 }, function (accessToken, refreshToken, profile, done) {
+    // Set displayName to GitHub username if it's null
+    profile.displayName = profile.displayName || profile.username;
     return done(null, profile);
 }));
 
