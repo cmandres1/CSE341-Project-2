@@ -15,6 +15,18 @@ router.get('/logout', function (req, res, next) {
     });
 });
 
+// GitHub OAuth callback route
+router.get(
+    '/github/callback',
+    passport.authenticate('github', {
+        failureRedirect: '/login',
+        session: true // Ensure Passport handles session
+    }),
+    (req, res) => {
+        console.log('Logged in user:', req.user); // Debug log to check user object
+        res.redirect('/');
+    }
+);
 
 // Load Swagger documentation after authentication routes
 router.use('/', require('./swagger'));
@@ -22,6 +34,15 @@ router.use('/', require('./swagger'));
 // Register API routes
 router.use('/pets', require('./pets'));
 router.use('/vets', require('./vets'));
+
+// Home route
+router.get('/', (req, res) => {
+    if (req.isAuthenticated()) {
+        res.send(`Logged in as ${req.user.displayName || req.user.username}`);
+    } else {
+        res.send('Logged Out. <a href="/login">Login</a>');
+    }
+});
 
 // Catch-all for unknown routes
 router.use((req, res) => {

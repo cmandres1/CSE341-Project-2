@@ -14,21 +14,21 @@ app.use(bodyParser.json());
 
 app.use(
     session({
-        secret: 'secret', // Use a secure secret key in production
-        resave: false,
-        saveUninitialized: true,
-        store: MongoStore.create({ 
-            mongoUrl: process.env.MONGO_URI,
-            ttl: 24 * 60 * 60 
-        }),
-        cookie: {
-            secure: true, // Set to true if using HTTPS
-            httpOnly: true,
-            maxAge: 24 * 60 * 60 * 1000 // 1-day session expiry
-        },
-        name : 'sessionID'
+      secret:'secret',
+      resave: false,
+      saveUninitialized: false,
+      store: MongoStore.create({
+        mongoUrl: process.env.MONGODB_URI,
+        ttl: 24 * 60 * 60 // 1 day
+      }),
+      cookie: {
+        secure: true, // Set to true since you're using HTTPS
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000
+      },
+      name: 'sessionId'
     })
-);
+  );
 
 // Initialize Passport and session management
 app.use(passport.initialize());
@@ -36,15 +36,18 @@ app.use(passport.session());
 
 // Set CORS and security headers
 app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', 'https://cse341-project-2-2pfk.onrender.com');
+    res.setHeader('Access-Control-Allow-Origin', '*'); // Force HTTPS
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader(
-        'Access-Control-Allow-Headers' ,
-        'Origin, X-Requested-With, Content-Type, Accept, Z-Key, Authorization'
+      'Access-Control-Allow-Headers',
+      'Origin, X-Requested-With, Content-Type, Accept, Z-Key, Authorization'
     );
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+    res.setHeader(
+      'Access-Control-Allow-Methods',
+      'GET, POST, PUT, PATCH, OPTIONS, DELETE'
+    );
     next();
-});
+  });
 
 app.use(
     cors({
@@ -61,38 +64,39 @@ app.use('/', require('./routes/index.js'));
 passport.use(
     new GitHubStrategy(
         {
-            clientID: process.env.GITHUB_CLIENT_ID,
-            clientSecret: process.env.GITHUB_CLIENT_SECRET,
-            callbackURL: process.env.CALLBACK_URL
+          clientID: process.env.GITHUB_CLIENT_ID,
+          clientSecret: process.env.GITHUB_CLIENT_SECRET,
+          callbackURL: process.env.CALLBACK_URL,
         },
-        function (accessToken, refreshToken, profile, done) {
-            try {
-                if (!profile || !profile.id) {
-                  console.error("GitHub authentication failed: No profile received.");
-                  return done(null, false, { message: "GitHub authentication failed" });
-                }
-        
-                console.log("GitHub OAuth callback received:", {
-                  profileId: profile.id,
-                  username: profile.username,
-                  displayName: profile.displayName
-                });
-        
-                // Create user object
-                const user = {
-                  id: profile.id,
-                  username: profile.username,
-                  displayName: profile.displayName || profile.username,
-                  provider: "github",
-                };
-            return done(null, profile); 
-        } catch (error) {
+        async function (accessToken, refreshToken, profile, done) {
+          try {
+            if (!profile || !profile.id) {
+              console.error("GitHub authentication failed: No profile received.");
+              return done(null, false, { message: "GitHub authentication failed" });
+            }
+    
+            console.log("GitHub OAuth callback received:", {
+              profileId: profile.id,
+              username: profile.username,
+              displayName: profile.displayName
+            });
+    
+            // Create user object
+            const user = {
+              id: profile.id,
+              username: profile.username,
+              displayName: profile.displayName || profile.username,
+              provider: "github",
+            };
+    
+            return done(null, user);
+          } catch (error) {
             console.error("Error in GitHub OAuth callback:", error);
-            return done(error); 
+            return done(error);
+          }
         }
-    }
-    )
-);
+      )
+    );
 
 passport.serializeUser((user, done) => {
     done(null, user);
@@ -104,17 +108,18 @@ passport.deserializeUser((user, done) => {
 
 // Home route
 app.get('/', (req, res) => {
-    if (req.isAuthenticated()) {
-      res.send(`Logged in as ${req.user.username || req.user.displayName}`);
+    console.log('Current session:', req.session);
+    if (req.session.user) {
+        res.send(`Logged in as ${req.session.user.displayName}`);
     } else {
-      res.send('Logged out');
+        res.send('Logged Out. <a href="/login">Login</a>');
     }
-  });
+});
 
 // GitHub authentication callback
 app.get(
     '/github/callback',
-    passport.authenticate('github', { failureRedirect: '/api-docs' , session: true}),
+    passport.authenticate('github', { failureRedirect: '/login' }),
     (req, res) => {
         console.log('User after authentication:', req.user); // Debugging
         req.session.user = req.user; // Store user in session
