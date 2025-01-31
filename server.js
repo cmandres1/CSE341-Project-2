@@ -6,6 +6,7 @@ const session = require('express-session');
 const GitHubStrategy = require('passport-github2').Strategy;
 const cors = require('cors');
 const MongoStore = require('connect-mongo');
+const mongoose = require("mongoose");
 
 const app = express();
 const port = process.env.PORT || 10000;
@@ -67,30 +68,33 @@ app.use('/', require('./routes/index.js'));
     done(null, user.id); // Store only the user ID in the session
 });
 
+const mongoose = require("mongoose");
+
 passport.deserializeUser(async (id, done) => {
-  try {
-      console.log("Deserializing user ID:", id);
+    try {
+        console.log("Deserializing user ID:", id);
 
-      // Retrieve the session from MongoDB
-      const sessionData = await mongodb.getDb()
-          .collection("sessions")
-          .findOne({ "session.passport.user.id": id });
+        // Fetch the session directly from MongoDB
+        const sessionData = await mongoose.connection.db
+            .collection("sessions")
+            .findOne({ "session.passport.user.id": id });
 
-      if (!sessionData) {
-          console.warn("No session found for user ID:", id);
-          return done(null, false);
-      }
+        if (!sessionData) {
+            console.warn("No session found for user ID:", id);
+            return done(null, false);
+        }
 
-      // Extract user details from session
-      const user = JSON.parse(sessionData.session).passport.user;
-      console.log("Restored user:", user);
+        // Extract user details from session
+        const user = sessionData.session.passport.user;
+        console.log("Restored user:", user);
 
-      done(null, user);
-  } catch (error) {
-      console.error("Error deserializing user:", error);
-      done(error);
-  }
+        done(null, user);
+    } catch (error) {
+        console.error("Error deserializing user:", error);
+        done(error);
+    }
 });
+
 
 // Configure GitHub authentication
 passport.use(

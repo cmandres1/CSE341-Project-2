@@ -5,10 +5,10 @@
     "description": "Pets API, including veterinarians",
     "version": "1.0.0"
   },
-  "host": "cse341-project-2-2pfk.onrender.com",
+  "host": "localhost:10000",
   "basePath": "/",
   "schemes": [
-    "https"
+    "http"
   ],
   "paths": {
     "/": {
