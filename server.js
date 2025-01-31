@@ -6,7 +6,6 @@ const session = require('express-session');
 const GitHubStrategy = require('passport-github2').Strategy;
 const cors = require('cors');
 const MongoStore = require('connect-mongo');
-import router from './routes/index.js';
 
 const app = express();
 const port = process.env.PORT || 10000;
@@ -170,8 +169,6 @@ app.get(
     });
   });
   
-  // Use router for all routes
-app.use('/', router);
 
   app.use((req, res, next) => {
     console.log('Session:', req.session);
