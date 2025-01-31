@@ -17,6 +17,7 @@ app.use(session({
     cookie: {
         secure: true, // Set to true if using HTTPS
         httpOnly: true, 
+        sameSite: 'none', // Required for cross-site cookies
         maxAge: 24 * 60 * 60 * 1000 // 1-day session expiry
     }
 }));
@@ -34,7 +35,7 @@ app.use( (req, res, next) => {
 });
 
 app.use(cors({
-    origin: '*', 
+    origin: 'https://cse341-project-2-2pfk.onrender.com', 
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allow methods
     allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept'], // Allow specific headers
     credentials: true // Allow credentials (cookies) to be sent
