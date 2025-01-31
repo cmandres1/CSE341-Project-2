@@ -52,7 +52,7 @@ app.use((req, res, next) => {
 
 app.use(
     cors({
-        origin: ['https://cse341-project-2-2pfk.onrender.com'],
+        origin: 'https://cse341-project-2-2pfk.onrender.com',
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allowed methods
         allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept'], // Allowed headers
         credentials: true // Allow credentials (cookies) to be sent
