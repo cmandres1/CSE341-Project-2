@@ -99,24 +99,33 @@ passport.use(
       }
     )
   );
+
+// GitHub authentication callback
+app.get(
+  '/github/callback',
+  (req, res, next) => {
+    console.log('Entering callback route');
+    next();
+  },
+  passport.authenticate('github', { failureRedirect: '/api-docs', session: true }),
+  (req, res) => {
+    console.log('Authentication successful', { user: req.user?.username });
+    // Store user info in session
+    req.session.user = req.user; // Make sure this is done after successful login
+    res.redirect('/');
+  }
+);
   
-  app.get('/github/callback', passport.authenticate('github', { failureRedirect: '/api-docs' }), (req, res) => {
-    console.log('Authentication successful', req.user);
-    
-    req.session.save(err => {
-        if (err) {
-            console.error('Session Save Error:', err);
-        }
-        res.redirect('/');
-    });
-});
 
 passport.serializeUser((user, done) => {
     done(null, user);
 });
 
 passport.deserializeUser((user, done) => {
-    done(null, user);
+  if (!user) {
+      return done(null, false); // No user found, session invalid
+  }
+  return done(null, user); // Restore user from session
 });
 
 // Debug middleware
@@ -139,29 +148,15 @@ app.get('/debug-session', (req, res) => {
 });
 
 // Home route
-/* app.get('/', (req, res) => {
+app.get('/', (req, res) => {
     if (req.isAuthenticated()) {
       res.send(`Logged in as ${req.user.username || req.user.displayName}`);
     } else {
       res.send('Logged out');
     }
-  }); */
+  });
 
-// GitHub authentication callback
-/* app.get(
-    '/github/callback',
-    (req, res, next) => {
-      console.log('Entering callback route');
-      next();
-    },
-    passport.authenticate('github', { failureRedirect: '/api-docs', session: true }),
-    (req, res) => {
-      console.log('Authentication successful', { user: req.user?.username });
-      // Store user info in session
-      req.session.user = req.user; // Make sure this is done after successful login
-      res.redirect('/');
-    }
-  ); */
+
 
   app.get('/logout', (req, res) => {
     req.logout((err) => {
