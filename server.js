@@ -17,7 +17,7 @@ app.use(
         resave: false,
         saveUninitialized: true,
         cookie: {
-            secure: process.env.NODE_ENV === 'production', // Set to true if using HTTPS
+            secure: true, // Set to true if using HTTPS
             httpOnly: true,
             maxAge: 24 * 60 * 60 * 1000 // 1-day session expiry
         }
@@ -44,7 +44,7 @@ app.use(
         origin: '*',
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allowed methods
         allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept'], // Allowed headers
-       /*  credentials: true // Allow credentials (cookies) to be sent */
+        credentials: true // Allow credentials (cookies) to be sent
     })
 );
 
