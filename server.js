@@ -22,11 +22,10 @@ app.use(
         ttl: 24 * 60 * 60 // 1 day
       }),
       cookie: {
-        secure: process.env.NODE_ENV === 'production', // Set to true since you're using HTTPS
+        secure: true, // Set to true since you're using HTTPS
         httpOnly: true,
         maxAge: 24 * 60 * 60 * 1000,
-        sameSite: 'lax', // Helps with cross-site requests, use 'strict' for stricter policies
-        path: '/', // Available to all routes
+        sameSite: 'none', // Helps with cross-site requests, use 'strict' for stricter policies
       },
       name: 'sessionId'
     })
@@ -147,24 +146,22 @@ app.get('/', (req, res) => {
   });
 
 // GitHub authentication callback
-app.get('/github/callback', 
-  passport.authenticate('github', { failureRedirect: '/api-docs', session: true }), 
-  (req, res) => {
-    console.log('Authentication successful:', { user: req.user });
+app.get('/github/callback', passport.authenticate('github', { failureRedirect: '/api-docs' }), (req, res) => {
+  console.log('Authentication successful', { user: req.user });
 
-    // Debug session details
-    console.log('🔍 Session Before Save:', req.session);
+  // Force session save
+  req.session.user = req.user;
+  req.session.save(err => {
+      if (err) {
+          console.error('Session Save Error:', err);
+      }
+      console.log("Session after login:", req.session);
 
-    req.session.user = req.user;
-
-    req.session.save(err => {
-        if (err) {
-            console.error('❌ Session Save Error:', err);
-        } else {
-            console.log('✅ Session Saved:', req.session);
-        }
-        res.redirect('/');
-    });
+      // Send explicit Set-Cookie header
+      res.setHeader('Set-Cookie', `sessionId=${req.sessionID}; Path=/; HttpOnly; Secure; SameSite=None`);
+      
+      res.redirect('/');
+  });
 });
 /* app.get(
     '/github/callback',
