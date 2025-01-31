@@ -119,6 +119,15 @@ app.use((req, res, next) => {
   next();
 });
 
+// Debug route
+app.get('/debug-session', (req, res) => {
+  res.json({
+    isAuthenticated: req.isAuthenticated(),
+    user: req.user,
+    session: req.session
+  });
+});
+
 // Home route
 app.get('/', (req, res) => {
     if (req.isAuthenticated()) {
