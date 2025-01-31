@@ -119,14 +119,21 @@ app.get('/', (req, res) => {
 // GitHub authentication callback
 app.get(
     '/github/callback',
-    passport.authenticate('github', { failureRedirect: '/login' }),
+    (req, res, next) => {
+      console.log('Entering callback route');
+      next();
+    },
+    passport.authenticate('github', { 
+      failureRedirect: '/api-docs',
+      session: true
+    }),
     (req, res) => {
-        console.log('User after authentication:', req.user); // Debugging
-        req.session.user = req.user; // Store user in session
-        console.log('Session after setting user:', req.session); // Debugging
-        res.redirect('/');
+      console.log('Authentication successful', {
+        user: req.user?.username
+      });
+      res.redirect('/');
     }
-);
+  );
 
 // Initialize database and start server
 mongodb.initDb((err) => {
