@@ -111,10 +111,12 @@ passport.deserializeUser((id, done) => {
 
 // Debug middleware
 app.use((req, res, next) => {
-  console.log('Session:', {
-    isAuthenticated: req.isAuthenticated?.(),
-    sessionID: req.sessionID,
-    user: req.user?.username
+  console.log('🔍 Session Debug:', {
+    sessionId: req.sessionID,
+    sessionExists: !!req.session,
+    sessionUser: req.session?.user,
+    passportUser: req.user,
+    isAuthenticated: req.isAuthenticated?.()
   });
   next();
 });
@@ -138,7 +140,26 @@ app.get('/', (req, res) => {
   });
 
 // GitHub authentication callback
-app.get(
+app.get('/github/callback', 
+  passport.authenticate('github', { failureRedirect: '/api-docs', session: true }), 
+  (req, res) => {
+    console.log('Authentication successful:', { user: req.user });
+
+    // Debug session details
+    console.log('🔍 Session Before Save:', req.session);
+
+    req.session.user = req.user;
+
+    req.session.save(err => {
+        if (err) {
+            console.error('❌ Session Save Error:', err);
+        } else {
+            console.log('✅ Session Saved:', req.session);
+        }
+        res.redirect('/');
+    });
+});
+/* app.get(
     '/github/callback',
     (req, res, next) => {
       console.log('Entering callback route');
@@ -151,7 +172,7 @@ app.get(
       req.session.user = req.user; // Make sure this is done after successful login
       res.redirect('/');
     }
-  );
+  ); */
 
   app.get('/logout', (req, res) => {
     req.logout((err) => {
