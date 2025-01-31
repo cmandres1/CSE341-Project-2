@@ -109,6 +109,16 @@ passport.deserializeUser((user, done) => {
     done(null, user);
 });
 
+// Debug middleware
+app.use((req, res, next) => {
+  console.log('Session:', {
+    isAuthenticated: req.isAuthenticated?.(),
+    sessionID: req.sessionID,
+    user: req.user?.username
+  });
+  next();
+});
+
 // Home route
 app.get('/', (req, res) => {
     if (req.isAuthenticated()) {
