@@ -63,40 +63,41 @@ app.use('/', require('./routes/index.js'));
 // Configure GitHub authentication
 passport.use(
     new GitHubStrategy(
-        {
-          clientID: process.env.GITHUB_CLIENT_ID,
-          clientSecret: process.env.GITHUB_CLIENT_SECRET,
-          callbackURL: process.env.CALLBACK_URL || "https://cse341-project-2-2pfk.onrender.com/github/callback",
-        },
-        async function (accessToken, refreshToken, profile, done) {
-          try {
-            if (!profile || !profile.id) {
-              console.error("GitHub authentication failed: No profile received.");
-              return done(null, false, { message: "GitHub authentication failed" });
-            }
-    
-            console.log("GitHub OAuth callback received:", {
-              profileId: profile.id,
-              username: profile.username,
-              displayName: profile.displayName
-            });
-    
-            // Create user object
-            const user = {
-              id: profile.id,
-              username: profile.username,
-              displayName: profile.displayName || profile.username,
-              provider: "github",
-            };
-    
-            return done(null, user);
-          } catch (error) {
-            console.error("Error in GitHub OAuth callback:", error);
-            return done(error);
+      {
+        clientID: process.env.GITHUB_CLIENT_ID,
+        clientSecret: process.env.GITHUB_CLIENT_SECRET,
+        callbackURL: process.env.CALLBACK_URL || "https://cse341-project-2-2pfk.onrender.com/github/callback",
+      },
+      async function (accessToken, refreshToken, profile, done) {
+        try {
+          if (!profile || !profile.id) {
+            console.error("GitHub authentication failed: No profile received.");
+            return done(null, false, { message: "GitHub authentication failed" });
           }
+  
+          console.log("GitHub OAuth callback received:", {
+            profileId: profile.id,
+            username: profile.username,
+            displayName: profile.displayName,
+          });
+  
+          // Set the displayName to username if displayName is not provided by GitHub
+          const user = {
+            id: profile.id,
+            username: profile.username,
+            displayName: profile.displayName || profile.username,  // Default to username if displayName is null
+            provider: "github",
+          };
+  
+          return done(null, user);
+        } catch (error) {
+          console.error("Error in GitHub OAuth callback:", error);
+          return done(error);
         }
-      )
-    );
+      }
+    )
+  );
+  
 
 passport.serializeUser((user, done) => {
     done(null, user);
@@ -130,6 +131,7 @@ app.get(
       console.log('Authentication successful', {
         user: req.user?.username
       });
+      req.session.user = req.user;
       res.redirect('/');
     }
   );
