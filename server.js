@@ -36,7 +36,7 @@ app.use(passport.session());
 
 // Set CORS and security headers
 app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*'); // Force HTTPS
+    res.setHeader('Access-Control-Allow-Origin', 'https://cse341-project-2-2pfk.onrender.com/'); // Force HTTPS
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader(
       'Access-Control-Allow-Headers',
@@ -51,7 +51,7 @@ app.use((req, res, next) => {
 
 app.use(
     cors({
-        origin: '*',
+        origin: ['https://cse341-project-2-2pfk.onrender.com/'],
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allowed methods
         allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept'], // Allowed headers
         credentials: true // Allow credentials (cookies) to be sent
