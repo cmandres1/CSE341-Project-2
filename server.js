@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const mongodb = require('./data/database');
+const { initDb, getDatabase } = require("./data/database");
 const passport = require('passport');
 const session = require('express-session');
 const GitHubStrategy = require('passport-github2').Strategy;
@@ -69,28 +69,32 @@ app.use('/', require('./routes/index.js'));
 });
 
 passport.deserializeUser(async (id, done) => {
-    try {
-        console.log("Deserializing user ID:", id);
+  try {
+      console.log("Deserializing user ID:", id);
 
-        // Fetch the session directly from MongoDB
-        const sessionData = await mongoose.connection.db
-            .collection("sessions")
-            .findOne({ "session.passport.user.id": id });
+      const db = getDatabase();
+      if (!db) {
+          console.error("❌ Database connection is not initialized!");
+          return done(new Error("Database not initialized"));
+      }
 
-        if (!sessionData) {
-            console.warn("No session found for user ID:", id);
-            return done(null, false);
-        }
+      const sessionData = await db.collection("sessions").findOne({
+          "session.passport.user.id": id
+      });
 
-        // Extract user details from session
-        const user = sessionData.session.passport.user;
-        console.log("Restored user:", user);
+      if (!sessionData) {
+          console.warn("⚠️ No session found for user ID:", id);
+          return done(null, false);
+      }
 
-        done(null, user);
-    } catch (error) {
-        console.error("Error deserializing user:", error);
-        done(error);
-    }
+      const user = sessionData.session.passport.user;
+      console.log("✅ Restored user:", user);
+
+      done(null, user);
+  } catch (error) {
+      console.error("❌ Error deserializing user:", error);
+      done(error);
+  }
 });
 
 
