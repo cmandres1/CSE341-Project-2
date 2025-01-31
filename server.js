@@ -68,8 +68,6 @@ app.use('/', require('./routes/index.js'));
     done(null, user.id); // Store only the user ID in the session
 });
 
-const mongoose = require("mongoose");
-
 passport.deserializeUser(async (id, done) => {
     try {
         console.log("Deserializing user ID:", id);
