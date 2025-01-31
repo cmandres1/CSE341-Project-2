@@ -11,13 +11,13 @@ const app = express();
 const port = process.env.PORT || 10000;
 app.use(bodyParser.json());
 app.use(session({
-    secret: 'secret', // Use a secure secret key in production
+    secret: '6741051366', // Use a secure secret key in production
     resave: false, 
     saveUninitialized: true, 
     cookie: {
         secure: true, // Set to true if using HTTPS
         httpOnly: true, 
-        sameSite: 'none', // Required for cross-site cookies
+        sameSite: 'lax', // Required for cross-site cookies
         maxAge: 24 * 60 * 60 * 1000 // 1-day session expiry
     }
 }));
