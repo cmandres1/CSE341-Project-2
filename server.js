@@ -78,7 +78,7 @@ passport.use(
           console.log("GitHub OAuth callback received:", {
             profileId: profile.id,
             username: profile.username,
-            displayName: profile.displayName,
+            displayName: profile.displayName || profile.username,
           });
   
           // Set the displayName to username if displayName is not provided by GitHub
