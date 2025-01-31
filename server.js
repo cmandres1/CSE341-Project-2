@@ -99,18 +99,27 @@ passport.use(
     )
   );
 
-passport.serializeUser((user, done) => {
-    console.log("Serializing user:", user); // Debugging
-    done(null, user.id); // Store only user ID in the session
+  passport.serializeUser((user, done) => {
+    console.log("Serializing user:", user);
+    done(null, user.id); // Store only the user ID in the session
 });
 
 passport.deserializeUser(async (id, done) => {
     try {
-        console.log("Deserializing user with ID:", id); // Debugging
-        // Reconstruct user object (or fetch from DB if needed)
-        const user = { id, username: "cmandres1", displayName: "cmandres1", provider: "github" };
-        done(null, user);
+        console.log("Deserializing user with ID:", id);
+
+        // Fetch the user from MongoDB session store
+        const session = await mongodb.getDb().collection('sessions').findOne({ "session.user.id": id });
+
+        if (session && session.session && session.session.user) {
+            console.log("User found in session store:", session.session.user);
+            return done(null, session.session.user); // Load user into req.user
+        } else {
+            console.warn("User session not found in MongoDB.");
+            return done(null, false);
+        }
     } catch (error) {
+        console.error("Error deserializing user:", error);
         done(error);
     }
 });
