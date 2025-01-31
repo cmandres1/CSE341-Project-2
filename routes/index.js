@@ -3,7 +3,7 @@ const express = require('express');
 const passport = require('passport');
 
 // Define authentication routes first
-router.get('/login', passport.authenticate('github'));
+router.get('/login', passport.authenticate('github'), (req, res) => {});
 
 // Logout route
 router.get('/logout', function (req, res, next) {
