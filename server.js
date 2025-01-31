@@ -100,6 +100,16 @@ passport.use(
     )
   );
   
+  app.get('/github/callback', passport.authenticate('github', { failureRedirect: '/api-docs' }), (req, res) => {
+    console.log('Authentication successful', req.user);
+    
+    req.session.save(err => {
+        if (err) {
+            console.error('Session Save Error:', err);
+        }
+        res.redirect('/');
+    });
+});
 
 passport.serializeUser((user, done) => {
     done(null, user);
@@ -129,16 +139,16 @@ app.get('/debug-session', (req, res) => {
 });
 
 // Home route
-app.get('/', (req, res) => {
+/* app.get('/', (req, res) => {
     if (req.isAuthenticated()) {
       res.send(`Logged in as ${req.user.username || req.user.displayName}`);
     } else {
       res.send('Logged out');
     }
-  });
+  }); */
 
 // GitHub authentication callback
-app.get(
+/* app.get(
     '/github/callback',
     (req, res, next) => {
       console.log('Entering callback route');
@@ -151,7 +161,7 @@ app.get(
       req.session.user = req.user; // Make sure this is done after successful login
       res.redirect('/');
     }
-  );
+  ); */
 
   app.get('/logout', (req, res) => {
     req.logout((err) => {
