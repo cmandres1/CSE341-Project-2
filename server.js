@@ -5,12 +5,19 @@ const passport = require('passport');
 const session = require('express-session');
 const GitHubStrategy = require('passport-github2').Strategy;
 const cors = require('cors');
+const MongoStore = require('connect-mongo');
+const mongoose = require('mongoose');
 
 const app = express();
+mongoose.connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  }).then(() => console.log('MongoDB Connected'))
+    .catch(err => console.error('MongoDB Connection Error:', err));
 
 const port = process.env.PORT || 10000;
 app.use(bodyParser.json());
-app.use(session({
+/* app.use(session({
     secret: '6741051366', // Use a secure secret key in production
     resave: false, 
     saveUninitialized: true, 
@@ -20,7 +27,24 @@ app.use(session({
         sameSite: 'lax', // Required for cross-site cookies
         maxAge: 24 * 60 * 60 * 1000 // 1-day session expiry
     }
-}));
+})); */
+
+app.use(session({
+    secret: 'secret', 
+    resave: false,
+    saveUninitialized: true, 
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGO_URI, // Your MongoDB connection string
+      collectionName: 'sessions',
+      ttl: 14 * 24 * 60 * 60, // Session expires in 14 days
+      autoRemove: 'native' // Automatically remove expired sessions
+    }),
+    cookie: {
+      secure: true, // Secure in production (HTTPS)
+      httpOnly: true, // Prevent client-side access
+      maxAge: 1000 * 60 * 60 * 24 // 24 hours
+    }
+  }));
 
 // This is the basic express session ({...}) initialization
 app.use(passport.initialize());
