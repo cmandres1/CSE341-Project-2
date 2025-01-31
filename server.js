@@ -24,7 +24,9 @@ app.use(
       cookie: {
         secure: true, // Set to true since you're using HTTPS
         httpOnly: true,
-        maxAge: 24 * 60 * 60 * 1000
+        maxAge: 24 * 60 * 60 * 1000,
+        sameSite: 'lax', // Helps with cross-site requests, use 'strict' for stricter policies
+        path: '/', // Available to all routes
       },
       name: 'sessionId'
     })
