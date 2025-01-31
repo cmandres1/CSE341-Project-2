@@ -52,14 +52,11 @@ passport.use(new GitHubStrategy({
 }));
 
 passport.serializeUser((user, done) => {
-    done(null, user.id);  // Store user ID in the session
+    done(null, user.id); // Store only the user ID in the session
 });
 
 passport.deserializeUser((id, done) => {
-    // Retrieve user from database or cache using the ID stored in the session
-    User.findById(id, (err, user) => {
-        done(err, user);  // Attach the full user object to the session
-    });
+    done(null, { id: id });
 });
 
 app.get('/session', (req, res) => {
