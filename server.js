@@ -108,13 +108,12 @@ passport.deserializeUser((user, done) => {
 
 // Home route
 app.get('/', (req, res) => {
-    console.log('Current session:', req.session);
-    if (req.session.user) {
-        res.send(`Logged in as ${req.session.user.displayName}`);
+    if (req.isAuthenticated()) {
+      res.send(`Logged in as ${req.user.username || req.user.displayName}`);
     } else {
-        res.send('Logged Out. <a href="/login">Login</a>');
+      res.send('Logged out');
     }
-});
+  });
 
 // GitHub authentication callback
 app.get(
