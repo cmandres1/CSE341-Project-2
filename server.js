@@ -125,18 +125,31 @@ app.get(
       console.log('Entering callback route');
       next();
     },
-    passport.authenticate('github', { 
-      failureRedirect: '/api-docs',
-      session: true
-    }),
+    passport.authenticate('github', { failureRedirect: '/api-docs', session: true }),
     (req, res) => {
-      console.log('Authentication successful', {
-        user: req.user?.username
-      });
-      req.session.user = req.user;
+      console.log('Authentication successful', { user: req.user?.username });
+      // Store user info in session
+      req.session.user = req.user; // Make sure this is done after successful login
       res.redirect('/');
     }
   );
+
+  app.get('/logout', (req, res) => {
+    req.logout((err) => {
+      if (err) {
+        return next(err);
+      }
+      // Destroy the session and remove the session cookie
+      req.session.destroy((err) => {
+        if (err) {
+          return next(err);
+        }
+        res.clearCookie('sessionId'); // Clear session cookie
+        res.redirect('/'); // Redirect to home after logout
+      });
+    });
+  });
+  
 
   app.use((req, res, next) => {
     console.log('Session:', req.session);
