@@ -67,7 +67,7 @@ passport.use(
       {
         clientID: process.env.GITHUB_CLIENT_ID,
         clientSecret: process.env.GITHUB_CLIENT_SECRET,
-        callbackURL: process.env.CALLBACK_URL || "https://cse341-project-2-2pfk.onrender.com/github/callback",
+        callbackURL: process.env.CALLBACK_URL,
       },
       async function (accessToken, refreshToken, profile, done) {
         try {
