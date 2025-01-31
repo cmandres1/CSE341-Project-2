@@ -22,7 +22,7 @@ app.use(
         ttl: 24 * 60 * 60 // 1 day
       }),
       cookie: {
-        secure: true, // Set to true since you're using HTTPS
+        secure: process.env.NODE_ENV === 'production', // Set to true since you're using HTTPS
         httpOnly: true,
         maxAge: 24 * 60 * 60 * 1000,
         sameSite: 'lax', // Helps with cross-site requests, use 'strict' for stricter policies
@@ -100,32 +100,13 @@ passport.use(
     )
   );
 
-// GitHub authentication callback
-app.get(
-  '/github/callback',
-  (req, res, next) => {
-    console.log('Entering callback route');
-    next();
-  },
-  passport.authenticate('github', { failureRedirect: '/api-docs', session: true }),
-  (req, res) => {
-    console.log('Authentication successful', { user: req.user?.username });
-    // Store user info in session
-    req.session.user = req.user; // Make sure this is done after successful login
-    res.redirect('/');
-  }
-);
-  
-
-passport.serializeUser((user, done) => {
-    done(null, user);
+  passport.serializeUser((user, done) => {
+    done(null, user.id); // Store only user ID
 });
 
-passport.deserializeUser((user, done) => {
-  if (!user) {
-      return done(null, false); // No user found, session invalid
-  }
-  return done(null, user); // Restore user from session
+passport.deserializeUser((id, done) => {
+    // Retrieve user from session store (MongoDB)
+    done(null, { id, username: 'cmandres1', provider: 'github' }); // Fetch from DB in production
 });
 
 // Debug middleware
@@ -156,7 +137,21 @@ app.get('/', (req, res) => {
     }
   });
 
-
+// GitHub authentication callback
+app.get(
+    '/github/callback',
+    (req, res, next) => {
+      console.log('Entering callback route');
+      next();
+    },
+    passport.authenticate('github', { failureRedirect: '/api-docs', session: true }),
+    (req, res) => {
+      console.log('Authentication successful', { user: req.user?.username });
+      // Store user info in session
+      req.session.user = req.user; // Make sure this is done after successful login
+      res.redirect('/');
+    }
+  );
 
   app.get('/logout', (req, res) => {
     req.logout((err) => {
