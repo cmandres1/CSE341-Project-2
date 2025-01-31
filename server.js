@@ -44,7 +44,7 @@ app.use(
         origin: '*',
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allowed methods
         allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept'], // Allowed headers
-        credentials: true // Allow credentials (cookies) to be sent
+       /*  credentials: true // Allow credentials (cookies) to be sent */
     })
 );
 
