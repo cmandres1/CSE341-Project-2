@@ -29,6 +29,14 @@ router.get(
     }
 );
 
+router.get('/debug-session', (req, res) => {
+  res.json({
+    isAuthenticated: req.isAuthenticated(),
+    user: req.user,
+    session: req.session
+  });
+});
+
 // Load Swagger documentation after authentication routes
 router.use('/', require('./swagger'));
 
