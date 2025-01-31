@@ -36,7 +36,7 @@ app.use(passport.session());
 
 // Set CORS and security headers
 app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', 'https://cse341-project-2-2pfk.onrender.com/'); // Force HTTPS
+    res.setHeader('Access-Control-Allow-Origin', 'https://cse341-project-2-2pfk.onrender.com'); // Force HTTPS
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader(
       'Access-Control-Allow-Headers',
@@ -66,7 +66,7 @@ passport.use(
         {
           clientID: process.env.GITHUB_CLIENT_ID,
           clientSecret: process.env.GITHUB_CLIENT_SECRET,
-          callbackURL: process.env.CALLBACK_URL,
+          callbackURL: process.env.CALLBACK_URL || "https://cse341-project-2-2pfk.onrender.com/github/callback",
         },
         async function (accessToken, refreshToken, profile, done) {
           try {
