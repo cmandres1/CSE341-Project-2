@@ -100,13 +100,20 @@ passport.use(
     )
   );
 
-  passport.serializeUser((user, done) => {
-    done(null, user.id); // Store only user ID
+passport.serializeUser((user, done) => {
+    console.log("Serializing user:", user); // Debugging
+    done(null, user.id); // Store only user ID in the session
 });
 
-passport.deserializeUser((id, done) => {
-    // Retrieve user from session store (MongoDB)
-    done(null, { id, username: 'cmandres1', provider: 'github' }); // Fetch from DB in production
+passport.deserializeUser(async (id, done) => {
+    try {
+        console.log("Deserializing user with ID:", id); // Debugging
+        // Reconstruct user object (or fetch from DB if needed)
+        const user = { id, username: "cmandres1", displayName: "cmandres1", provider: "github" };
+        done(null, user);
+    } catch (error) {
+        done(error);
+    }
 });
 
 // Debug middleware
