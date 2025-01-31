@@ -1,37 +1,28 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const { initDb, getDatabase } = require("./data/database");
+const mongodb = require('./data/database');
 const passport = require('passport');
 const session = require('express-session');
 const GitHubStrategy = require('passport-github2').Strategy;
 const cors = require('cors');
-const MongoStore = require('connect-mongo');
-const mongoose = require("mongoose");
 
 const app = express();
 const port = process.env.PORT || 10000;
 
-app.set("trust proxy", 1);
 app.use(bodyParser.json());
 
 app.use(
     session({
-      secret:'secret',
-      resave: false,
-      saveUninitialized: false,
-      store: MongoStore.create({
-        mongoUrl: process.env.MONGODB_URI,
-        ttl: 24 * 60 * 60 // 1 day
-      }),
-      cookie: {
-        secure: true, // Set to true since you're using HTTPS
-        httpOnly: true,
-        maxAge: 24 * 60 * 60 * 1000,
-        sameSite: 'none', // Helps with cross-site requests, use 'strict' for stricter policies
-      },
-      name: 'sessionId'
+        secret: 'secret', // Use a secure secret key in production
+        resave: false,
+        saveUninitialized: true,
+        cookie: {
+            secure: false, // Set to true if using HTTPS
+            httpOnly: true,
+            maxAge: 24 * 60 * 60 * 1000 // 1-day session expiry
+        }
     })
-  );
+);
 
 // Initialize Passport and session management
 app.use(passport.initialize());
@@ -39,22 +30,18 @@ app.use(passport.session());
 
 // Set CORS and security headers
 app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', 'https://cse341-project-2-2pfk.onrender.com'); // Force HTTPS
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader(
-      'Access-Control-Allow-Headers',
-      'Origin, X-Requested-With, Content-Type, Accept, Z-Key, Authorization'
+        'Access-Control-Allow-Headers',
+        'Origin, X-Requested-With, Content-Type, Accept, Z-Key, Authorization'
     );
-    res.setHeader(
-      'Access-Control-Allow-Methods',
-      'GET, POST, PUT, PATCH, OPTIONS, DELETE'
-    );
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     next();
-  });
+});
 
 app.use(
     cors({
-        origin: 'https://cse341-project-2-2pfk.onrender.com',
+        origin: '*',
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allowed methods
         allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept'], // Allowed headers
         credentials: true // Allow credentials (cookies) to be sent
@@ -63,163 +50,49 @@ app.use(
 
 app.use('/', require('./routes/index.js'));
 
-  passport.serializeUser((user, done) => {
-    console.log("Serializing user:", user);
-    done(null, user.id); // Store only the user ID in the session
-});
-
-passport.deserializeUser(async (id, done) => {
-  try {
-      console.log("Deserializing user ID:", id);
-
-      const db = getDatabase();
-      if (!db) {
-          console.error("❌ Database connection is not initialized!");
-          return done(new Error("Database not initialized"));
-      }
-
-      const sessionData = await db.collection("sessions").findOne({
-          "session.passport.user.id": id
-      });
-
-      if (!sessionData) {
-          console.warn("⚠️ No session found for user ID:", id);
-          return done(null, false);
-      }
-
-      const user = sessionData.session.passport.user;
-      console.log("✅ Restored user:", user);
-
-      done(null, user);
-  } catch (error) {
-      console.error("❌ Error deserializing user:", error);
-      done(error);
-  }
-});
-
-
 // Configure GitHub authentication
 passport.use(
-  new GitHubStrategy(
-    {
-      clientID: process.env.GITHUB_CLIENT_ID,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET,
-      callbackURL: process.env.CALLBACK_URL,
-    },
-    async function (accessToken, refreshToken, profile, done) {
-      try {
-        if (!profile || !profile.id) {
-          console.error("GitHub authentication failed: No profile received.");
-          return done(null, false, { message: "GitHub authentication failed" });
+    new GitHubStrategy(
+        {
+            clientID: process.env.GITHUB_CLIENT_ID,
+            clientSecret: process.env.GITHUB_CLIENT_SECRET,
+            callbackURL: process.env.CALLBACK_URL
+        },
+        function (accessToken, refreshToken, profile, done) {
+            return done(null, profile);
         }
-
-        console.log("GitHub OAuth callback received:", {
-          profileId: profile.id,
-          username: profile.username,
-          displayName: profile.displayName || profile.username,
-        });
-
-        // Set the displayName to username if displayName is not provided by GitHub
-        const user = {
-          id: profile.id,
-          username: profile.username,
-          displayName: profile.displayName || profile.username,  // Default to username if displayName is null
-          provider: "github",
-        };
-
-        return done(null, user);
-      } catch (error) {
-        console.error("Error in GitHub OAuth callback:", error);
-        return done(error);
-      }
-    }
-  )
+    )
 );
 
-// Debug middleware
-app.use((req, res, next) => {
-  console.log('🔍 Session Debug:', {
-    sessionId: req.sessionID,
-    sessionExists: !!req.session,
-    sessionUser: req.session?.user,
-    passportUser: req.user,
-    isAuthenticated: req.isAuthenticated?.()
-  });
-  next();
+passport.serializeUser((user, done) => {
+    done(null, user);
 });
 
-// Debug route
-app.get('/debug-session', (req, res) => {
-  res.json({
-    isAuthenticated: req.isAuthenticated(),
-    user: req.user,
-    session: req.session
-  });
+passport.deserializeUser((user, done) => {
+    done(null, user);
 });
 
 // Home route
 app.get('/', (req, res) => {
-    if (req.isAuthenticated()) {
-      res.send(`Logged in as ${req.user.username || req.user.displayName}`);
+    console.log('Current session:', req.session);
+    if (req.session.user) {
+        res.send(`Logged in as ${req.session.user.displayName}`);
     } else {
-      res.send('Logged out');
+        res.send('Logged Out. <a href="/login">Login</a>');
     }
-  });
+});
 
 // GitHub authentication callback
-app.get('/github/callback', passport.authenticate('github', { failureRedirect: '/api-docs' }), (req, res) => {
-  console.log('Authentication successful', { user: req.user });
-
-  // Force session save
-  req.session.user = req.user;
-  req.session.save(err => {
-      if (err) {
-          console.error('Session Save Error:', err);
-      }
-      console.log("Session after login:", req.session);
-
-      // Send explicit Set-Cookie header
-      res.setHeader('Set-Cookie', `sessionId=${req.sessionID}; Path=/; HttpOnly; Secure; SameSite=None`);
-      
-      res.redirect('/');
-  });
-});
-/* app.get(
+app.get(
     '/github/callback',
-    (req, res, next) => {
-      console.log('Entering callback route');
-      next();
-    },
-    passport.authenticate('github', { failureRedirect: '/api-docs', session: true }),
+    passport.authenticate('github', { failureRedirect: '/login' }),
     (req, res) => {
-      console.log('Authentication successful', { user: req.user?.username });
-      // Store user info in session
-      req.session.user = req.user; // Make sure this is done after successful login
-      res.redirect('/');
+        console.log('User after authentication:', req.user); // Debugging
+        req.session.user = req.user; // Store user in session
+        console.log('Session after setting user:', req.session); // Debugging
+        res.redirect('/');
     }
-  ); */
-
-  app.get('/logout', (req, res) => {
-    req.logout((err) => {
-      if (err) {
-        return next(err);
-      }
-      // Destroy the session and remove the session cookie
-      req.session.destroy((err) => {
-        if (err) {
-          return next(err);
-        }
-        res.clearCookie('sessionId'); // Clear session cookie
-        res.redirect('/'); // Redirect to home after logout
-      });
-    });
-  });
-  
-
-  app.use((req, res, next) => {
-    console.log('Session:', req.session);
-    next();
-  });
+);
 
 // Initialize database and start server
 mongodb.initDb((err) => {

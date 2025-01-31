@@ -1,10 +1,9 @@
 const router = require('express').Router();
 const express = require('express');
 const passport = require('passport');
-const { route } = require('./swagger');
 
 // Define authentication routes first
-router.get('/login', passport.authenticate('github'), (req, res) => {});
+router.get('/login', passport.authenticate('github'));
 
 // Logout route
 router.get('/logout', function (req, res, next) {
@@ -29,14 +28,6 @@ router.get(
     }
 );
 
-router.get('/debug-session', (req, res) => {
-  res.json({
-    isAuthenticated: req.isAuthenticated(),
-    user: req.user,
-    session: req.session
-  });
-});
-
 // Load Swagger documentation after authentication routes
 router.use('/', require('./swagger'));
 
@@ -46,11 +37,11 @@ router.use('/vets', require('./vets'));
 
 // Home route
 router.get('/', (req, res) => {
-  if (req.isAuthenticated()) {
-    res.send(`Logged in as ${req.user.username || req.user.displayName}`);
-  } else {
-    res.send('Logged out');
-  }
+    if (req.isAuthenticated()) {
+        res.send(`Logged in as ${req.user.displayName || req.user.username}`);
+    } else {
+        res.send('Logged Out. <a href="/login">Login</a>');
+    }
 });
 
 // Catch-all for unknown routes
