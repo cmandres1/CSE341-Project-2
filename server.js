@@ -105,24 +105,26 @@ passport.use(
 });
 
 passport.deserializeUser(async (id, done) => {
-    try {
-        console.log("Deserializing user with ID:", id);
+  try {
+      console.log("Deserializing user with ID:", id);
 
-        // Fetch the user from MongoDB session store
-        const session = await mongodb.getDb().collection('sessions').findOne({ "session.user.id": id });
+      // Fetch the session from MongoDB using the stored session ID (which is embedded in the cookie)
+      const session = await mongodb.getDb().collection('sessions').findOne({ "session.passport.user.id": id });
 
-        if (session && session.session && session.session.user) {
-            console.log("User found in session store:", session.session.user);
-            return done(null, session.session.user); // Load user into req.user
-        } else {
-            console.warn("User session not found in MongoDB.");
-            return done(null, false);
-        }
-    } catch (error) {
-        console.error("Error deserializing user:", error);
-        done(error);
-    }
+      if (session && session.session && session.session.passport && session.session.passport.user) {
+          const user = session.session.passport.user;
+          console.log("User found in session store:", user);
+          return done(null, user); // Make sure the user is passed correctly to req.user
+      } else {
+          console.warn("Session or user not found in MongoDB.");
+          return done(null, false); // In case user not found
+      }
+  } catch (error) {
+      console.error("Error deserializing user:", error);
+      done(error);
+  }
 });
+
 
 // Debug middleware
 app.use((req, res, next) => {
